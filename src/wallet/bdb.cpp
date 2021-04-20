@@ -106,7 +106,7 @@ void BerkeleyEnvironment::Close()
 
 void BerkeleyEnvironment::Reset()
 {
-    dbenv.reset(new DbEnv(DB_CXX_NO_EXCEPTIONS));
+    dbenv = std::make_unique<DbEnv>(DB_CXX_NO_EXCEPTIONS);
     fDbEnvInit = false;
     fMockDb = false;
 }

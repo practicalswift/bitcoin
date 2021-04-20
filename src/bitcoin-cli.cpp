@@ -898,24 +898,24 @@ static int CommandLineRPC(int argc, char *argv[])
         std::unique_ptr<BaseRequestHandler> rh;
         std::string method;
         if (gArgs.IsArgSet("-getinfo")) {
-            rh.reset(new GetinfoRequestHandler());
+            rh = std::make_unique<GetinfoRequestHandler>();
         } else if (gArgs.GetBoolArg("-netinfo", false)) {
             if (!args.empty() && args.at(0) == "help") {
                 tfm::format(std::cout, "%s\n", NetinfoRequestHandler().m_help_doc);
                 return 0;
             }
-            rh.reset(new NetinfoRequestHandler());
+            rh = std::make_unique<NetinfoRequestHandler>();
         } else if (gArgs.GetBoolArg("-generate", false)) {
             const UniValue getnewaddress{GetNewAddress()};
             const UniValue& error{find_value(getnewaddress, "error")};
             if (error.isNull()) {
                 SetGenerateToAddressArgs(find_value(getnewaddress, "result").get_str(), args);
-                rh.reset(new GenerateToAddressRequestHandler());
+                rh = std::make_unique<GenerateToAddressRequestHandler>();
             } else {
                 ParseError(error, strPrint, nRet);
             }
         } else {
-            rh.reset(new DefaultRequestHandler());
+            rh = std::make_unique<DefaultRequestHandler>();
             if (args.size() < 1) {
                 throw std::runtime_error("too few parameters (need at least command)");
             }

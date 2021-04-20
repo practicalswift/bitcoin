@@ -4470,7 +4470,7 @@ void CWallet::SetupLegacyScriptPubKeyMan()
         return;
     }
 
-    auto spk_manager = std::unique_ptr<ScriptPubKeyMan>(new LegacyScriptPubKeyMan(*this));
+    std::unique_ptr<ScriptPubKeyMan> spk_manager = std::make_unique<LegacyScriptPubKeyMan>(*this);
     for (const auto& type : OUTPUT_TYPES) {
         m_internal_spk_managers[type] = spk_manager.get();
         m_external_spk_managers[type] = spk_manager.get();
@@ -4500,13 +4500,13 @@ void CWallet::LoadDescriptorScriptPubKeyMan(uint256 id, WalletDescriptor& desc)
 {
     if (IsWalletFlagSet(WALLET_FLAG_EXTERNAL_SIGNER)) {
 #ifdef ENABLE_EXTERNAL_SIGNER
-        auto spk_manager = std::unique_ptr<ScriptPubKeyMan>(new ExternalSignerScriptPubKeyMan(*this, desc));
+        std::unique_ptr<ScriptPubKeyMan> spk_manager  = std::make_unique<ExternalSignerScriptPubKeyMan>(*this, desc);
         m_spk_managers[id] = std::move(spk_manager);
 #else
         throw std::runtime_error(std::string(__func__) + ": Compiled without external signing support (required for external signing)");
 #endif
     } else {
-        auto spk_manager = std::unique_ptr<ScriptPubKeyMan>(new DescriptorScriptPubKeyMan(*this, desc));
+        std::unique_ptr<ScriptPubKeyMan> spk_manager = std::make_unique<DescriptorScriptPubKeyMan>(*this, desc);
         m_spk_managers[id] = std::move(spk_manager);
     }
 }
@@ -4528,7 +4528,7 @@ void CWallet::SetupDescriptorScriptPubKeyMans()
 
         for (bool internal : {false, true}) {
             for (OutputType t : OUTPUT_TYPES) {
-                auto spk_manager = std::unique_ptr<DescriptorScriptPubKeyMan>(new DescriptorScriptPubKeyMan(*this, internal));
+                std::unique_ptr<DescriptorScriptPubKeyMan> spk_manager = std::make_unique<DescriptorScriptPubKeyMan>(*this, internal);
                 if (IsCrypted()) {
                     if (IsLocked()) {
                         throw std::runtime_error(std::string(__func__) + ": Wallet is locked, cannot setup new descriptors");
@@ -4564,7 +4564,7 @@ void CWallet::SetupDescriptorScriptPubKeyMans()
                     continue;
                 }
                 OutputType t =  *desc->GetOutputType();
-                auto spk_manager = std::unique_ptr<ExternalSignerScriptPubKeyMan>(new ExternalSignerScriptPubKeyMan(*this, internal));
+                std::unique_ptr<ExternalSignerScriptPubKeyMan> spk_manager = std::make_unique<ExternalSignerScriptPubKeyMan>(*this, internal);
                 spk_manager->SetupDescriptor(std::move(desc));
                 uint256 id = spk_manager->GetID();
                 m_spk_managers[id] = std::move(spk_manager);
@@ -4627,7 +4627,7 @@ ScriptPubKeyMan* CWallet::AddWalletDescriptor(WalletDescriptor& desc, const Flat
     }
 
     LOCK(cs_wallet);
-    auto new_spk_man = std::unique_ptr<DescriptorScriptPubKeyMan>(new DescriptorScriptPubKeyMan(*this, desc));
+    std::unique_ptr<DescriptorScriptPubKeyMan> new_spk_man = std::make_unique<DescriptorScriptPubKeyMan>(*this, desc);
 
     // If we already have this descriptor, remove it from the maps but add the existing cache to desc
     auto old_spk_man = GetDescriptorScriptPubKeyMan(desc);

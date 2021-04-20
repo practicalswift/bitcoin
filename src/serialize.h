@@ -957,7 +957,7 @@ Serialize(Stream& os, const std::unique_ptr<const T>& p)
 template<typename Stream, typename T>
 void Unserialize(Stream& is, std::unique_ptr<const T>& p)
 {
-    p.reset(new T(deserialize, is));
+    p = std::make_unique<T>(deserialize, is);
 }
 
 

@@ -744,8 +744,8 @@ bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
     }
 
     assert(std::addressof(::ChainActive()) == std::addressof(m_active_chainstate.m_chain));
-    entry.reset(new CTxMemPoolEntry(ptx, ws.m_base_fees, nAcceptTime, m_active_chainstate.m_chain.Height(),
-            fSpendsCoinbase, nSigOpsCost, lp));
+    entry = std::make_unique<CTxMemPoolEntry>(ptx, ws.m_base_fees, nAcceptTime, m_active_chainstate.m_chain.Height(),
+                                              fSpendsCoinbase, nSigOpsCost, lp);
     unsigned int nSize = entry->GetTxSize();
 
     if (nSigOpsCost > MAX_STANDARD_TX_SIGOPS_COST)
@@ -5068,7 +5068,7 @@ CChainState& ChainstateManager::InitializeChainstate(CTxMemPool& mempool, const 
     if (to_modify) {
         throw std::logic_error("should not be overwriting a chainstate");
     }
-    to_modify.reset(new CChainState(mempool, m_blockman, snapshot_blockhash));
+    to_modify = std::make_unique<CChainState>(mempool, m_blockman, snapshot_blockhash);
 
     // Snapshot chainstates and initial IBD chaintates always become active.
     if (is_snapshot || (!is_snapshot && !m_active_chainstate)) {

@@ -104,7 +104,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     resetBlock();
 
-    pblocktemplate.reset(new CBlockTemplate());
+    pblocktemplate = std::make_unique<CBlockTemplate>();
 
     if(!pblocktemplate.get())
         return nullptr;
